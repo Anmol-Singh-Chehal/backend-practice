@@ -1,0 +1,10 @@
+/node_modules
+/dist
+/public
+.env
+.prettierrc
+.prettierignore
+package-lock.json
+package.json
+readme.md
+tsconfig.json
