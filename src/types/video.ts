@@ -1,7 +1,7 @@
 import { Document } from "mongoose";
-import userModel from "./userModel";
+import { userTypes } from "./user";
 
-interface videoModel extends Document{
+interface videoTypes extends Document{
     videoFile: string,
     thumbnail: string,
     title: string,
@@ -9,7 +9,7 @@ interface videoModel extends Document{
     duration: number,
     views: number,
     isPublished: boolean,
-    owner: userModel,
+    owner: userTypes,
 }
 
-export default videoModel;
+export default videoTypes;
