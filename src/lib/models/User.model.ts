@@ -89,7 +89,7 @@ UserSchema.methods.generateRefreshToken = function(){
     }
 
     if(!secret || !expiry){
-        console.log("REFRESH_TOKEN_SECRET & REFRESH_TOKEN_EXPIRY not found.");
+        console.log("REFRESH_TOKEN_SECRET or REFRESH_TOKEN_EXPIRY not found.");
         return null;
     }
 
