@@ -1,9 +1,13 @@
 class ApiResponse{
-    public success:boolean = false;
+    public success:boolean;
+    public statusCode:number;
+    public data: any;
+    public message: string;
+    
     constructor(
-        public statusCode:number,
-        public data: any,
-        public message: string,
+        statusCode:number,
+        data:any,
+        message:string,
     ){  
         this.data = data;
         this.message = message;
