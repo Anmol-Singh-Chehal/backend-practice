@@ -1,5 +1,5 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Model, Schema } from "mongoose";
-import { userTypes, userMethods } from "../../types/user";
+import { userTypes, userMethods } from "../../types/user.type";
 import bcrypt from "bcrypt";
 import jwt, { Secret } from "jsonwebtoken";
 import { StringValue } from "ms";

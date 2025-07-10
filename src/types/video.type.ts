@@ -1,5 +1,5 @@
 import { Document } from "mongoose";
-import { userTypes } from "./user";
+import { userTypes } from "./user.type";
 
 interface videoTypes extends Document{
     videoFile: string,

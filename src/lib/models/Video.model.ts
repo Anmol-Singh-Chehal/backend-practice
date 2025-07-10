@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from "mongoose";
-import videoTypes from "../../types/video";
+import videoTypes from "../../types/video.type";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const VideoSchema:Schema<videoTypes> = new Schema({
