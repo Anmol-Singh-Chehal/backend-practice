@@ -1,10 +1,10 @@
-import { signUp } from "../controllers/user.controller";
+import { signIn, signOut, signUp } from "../controllers/user.controller";
 import { Router } from "express";
 import { multerUpload } from "../middlewares/multer.middleware";
 
 const router = Router();
 
-router.route("/register").post(
+router.route("/sign-up").post(
     multerUpload.fields([
         {
             "name": "avatar",
@@ -17,5 +17,8 @@ router.route("/register").post(
     ]),
     signUp
 );
+
+router.route("/sign-in").post(signIn);
+router.route("/sign-out").post(signOut);
 
 export default router;
