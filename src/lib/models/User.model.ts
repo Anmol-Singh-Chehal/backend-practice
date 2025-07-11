@@ -1,8 +1,9 @@
-import mongoose, { CallbackWithoutResultAndOptionalError, Model, Schema } from "mongoose";
+import mongoose, { CallbackWithoutResultAndOptionalError, Model, ObjectId, Schema } from "mongoose";
 import { userTypes, userMethods } from "../../types/user.type";
 import bcrypt from "bcrypt";
 import jwt, { Secret } from "jsonwebtoken";
 import { StringValue } from "ms";
+import { accessTokenPayloadType } from "../../types/common.type";
 
 type userMethodModel = Model<userTypes, {}, userMethods>;
 
@@ -46,7 +47,7 @@ const UserSchema:Schema<userTypes, userMethodModel> = new Schema({
         required: [true, "Password is required."],
     },
     refreshToken: {
-        type: String
+        type: String,
     }
 }, {
     timestamps: true,
@@ -66,7 +67,7 @@ UserSchema.methods.isPasswordCorrect = async function(password:string){
 UserSchema.methods.generateAccessToken = function(){
     const secret = process.env.ACCESS_TOKEN_SECRET as Secret;
     const expiry = process.env.ACCESS_TOKEN_EXPIRY as StringValue;
-    const payload = {
+    const payload:accessTokenPayloadType = {
         _id: this._id,
         username: this.username,
         fullName: this.fullName,
@@ -84,9 +85,9 @@ UserSchema.methods.generateAccessToken = function(){
 UserSchema.methods.generateRefreshToken = function(){
     const secret = process.env.REFRESH_TOKEN_SECRET as Secret;
     const expiry = process.env.REFRESH_TOKEN_EXPIRY as StringValue;
-    const payload = {
+    const payload:{ _id:ObjectId } = {
         _id: this._id,
-    }
+    };
 
     if(!secret || !expiry){
         console.log("REFRESH_TOKEN_SECRET or REFRESH_TOKEN_EXPIRY not found.");

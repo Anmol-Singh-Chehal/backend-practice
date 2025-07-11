@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-const asycHandler = (fun:Function) => async (req:Request, res:Response, next:NextFunction) => {
+const asyncHandler = (fun:Function) => async (req:Request, res:Response, next:NextFunction) => {
     return Promise.resolve(fun(req, res, next)).catch((error:unknown) => {
         if(error instanceof Error){
             next(error);
@@ -25,4 +25,4 @@ const asycHandler = (fun:Function) => async (req:Request, res:Response, next:Nex
 //     }
 // }
 
-export default asycHandler;
+export default asyncHandler;
