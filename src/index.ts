@@ -1,8 +1,6 @@
+import "./utils/dotenv.config";
 import connectDB from "./lib/db/connection";
 import app from "./app";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 connectDB().then(() => {
     if(!process.env.PORT){

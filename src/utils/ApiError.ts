@@ -11,7 +11,7 @@ class ApiError extends Error {
         errors: string[] = [],
         data: any = null,
         success: boolean = false,
-        stack?: string,
+        stack: string = "",
     ) {
         super(message);
         this.statusCode = statusCode;
