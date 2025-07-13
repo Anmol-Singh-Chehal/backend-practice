@@ -1,11 +1,13 @@
 import asyncHandler from "../utils/asyncHandler";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import { User } from "../lib/models/User.model";
 import ApiError from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResonse";
 import { accessTokenPayloadType, signInDetails, signUpDetials, tokens } from "../types/common.type";
 import { ObjectId } from "mongoose";
+import jwt from "jsonwebtoken";
+import { userTypes } from "../types/user.type";
 
 const generateAccessAndRefreshToken = async (userId:ObjectId):Promise<tokens> => {
     try {
@@ -82,7 +84,7 @@ const signIn = asyncHandler(async (req:Request, res:Response) => {
 
     const { email, username, password } = req.body as signInDetails;
 
-    if(!email || !username || !password){
+    if(!email && !username && !password){
         throw new ApiError(400, "All fields are required.");
     }
 
@@ -137,4 +139,45 @@ const signOut = asyncHandler(async (req:Request, res:Response) => {
     );
 });
 
-export { signUp, signIn, signOut };
+const refreshTheAccessToken = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+
+    try {
+        const oldRefreshToken:string = req.cookies.refreshToken || req.body.refreshToken;
+        if(!oldRefreshToken) throw new ApiError(400, "Unauthorized access.");
+
+        if(!process.env.REFRESH_TOKEN_SECRET) throw new ApiError(500, "REFRESH_TOKEN_SECRET not found.");
+        const decodedToken = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+        if(!(typeof decodedToken === "object" && "_id" in decodedToken)) throw new ApiError(400, "Invalid refresh token.");
+
+        const user = await User.findById(decodedToken._id) as userTypes;
+        if(!user) throw new ApiError(400, "Unable to find user, unauthorized access.");
+
+        if(oldRefreshToken !== user.refreshToken) throw new ApiError(400, "Unautorized access and Invalid refresh token.");
+        
+        const { accessToken, refreshToken }:tokens = await generateAccessAndRefreshToken(user._id as ObjectId);
+        if(!(accessToken && refreshToken)) throw new ApiError(500, "Unable to generate access and refresh tokens.");
+
+        const options = {
+            httpOnly: true,
+            secure: true,
+        };
+
+        return res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json({
+            accessToken, refreshToken,
+            message: "successfully refreshed tokens.",
+        });
+
+    } catch (error:unknown) {
+        if(error instanceof Error){
+            throw new ApiError(400, error.message);
+        } else {
+            throw new ApiError(400, "Invalid access.");
+        }
+    }
+
+});
+
+export { signUp, signIn, signOut, refreshTheAccessToken };

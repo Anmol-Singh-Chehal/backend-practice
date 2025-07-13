@@ -1,4 +1,4 @@
-import { signIn, signOut, signUp } from "../controllers/user.controller";
+import { refreshTheAccessToken, signIn, signOut, signUp } from "../controllers/user.controller";
 import { Router } from "express";
 import { multerUpload } from "../middlewares/multer.middleware";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -21,5 +21,6 @@ router.route("/sign-up").post(
 
 router.route("/sign-in").post(signIn);
 router.route("/sign-out").post(verifyJWT, signOut);
+router.route("/refresh-token").post(refreshTheAccessToken);
 
 export default router;
