@@ -18,4 +18,15 @@ interface userMethods{
     generateRefreshToken(): string | null,
 }
 
-export { userTypes, userMethods };
+interface updatePasswordTypes{ 
+    oldPassword: string, 
+    newPassword: string, 
+    confirmPassword: string 
+}
+
+interface updateUserDetailsTypes{
+    fullName: string,
+    email: string,
+}
+
+export { userTypes, userMethods, updatePasswordTypes, updateUserDetailsTypes };
