@@ -4,7 +4,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary";
 import { User } from "../lib/models/User.model";
 import ApiError from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResonse";
-import { signInDetails, signUpDetials, tokens } from "../types/common.type";
+import { accessTokenPayloadType, signInDetails, signUpDetials, tokens } from "../types/common.type";
 import { ObjectId } from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId:ObjectId):Promise<tokens> => {
@@ -80,7 +80,8 @@ const signUp = asyncHandler(async (req:Request, res:Response) => {
 
 const signIn = asyncHandler(async (req:Request, res:Response) => {
 
-    const { email, username, password }:signInDetails = req.body;
+    const { email, username, password } = req.body as signInDetails;
+
     if(!email || !username || !password){
         throw new ApiError(400, "All fields are required.");
     }
@@ -114,8 +115,11 @@ const signIn = asyncHandler(async (req:Request, res:Response) => {
 });
 
 const signOut = asyncHandler(async (req:Request, res:Response) => {
+    if(!("user" in req)) throw new ApiError(500, "User doesn't exists in req.");
+    
+    const userDetails = req.user as accessTokenPayloadType;
     const user = await User.findByIdAndUpdate(
-        req.user._id,
+        userDetails._id,
         { $set: { refreshToken: undefined } },
         { new: true }
     );

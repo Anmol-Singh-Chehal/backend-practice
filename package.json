@@ -5,7 +5,8 @@
   "scripts": {
     "watch": "tsc --watch",
     "prettier": "npx prettier . --write",
-    "dev": "npx ts-node ./src/index"
+    "dev": "npx ts-node ./src/index",
+    "dev-js": "nodemon ./dist/index"
   },
   "keywords": [],
   "author": "",
