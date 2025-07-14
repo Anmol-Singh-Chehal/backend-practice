@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs"
+import ApiError from "./ApiError";
 
 if(!process.env.CLOUDINARY_DB_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET){
     throw new Error("CLOUDINARY_DB_NAME or CLOUDINARY_API_KEY or CLOUDINARY_API_SECRET not found.");
@@ -26,6 +27,23 @@ export const uploadOnCloudinary = async (localFilePath:string) => {
     } catch(error:unknown) {
         console.log("Failed to upload file: ", error);
         fs.unlinkSync(localFilePath);
+        return null;
+    }
+}
+
+export const deleteFromCloudinary = async (fileUrl:string) => {
+    try{
+        if(!fileUrl) throw new ApiError(500, "fileUrl is not provided.");
+        const values = fileUrl.split("/");
+        const imageId = values[values.length-1].split(".")[0];
+        if(!imageId) throw new ApiError(500, "Image id not found.");
+
+        const response = await cloudinary.uploader.destroy(imageId);
+        if(!response) return false;
+        else return true;
+            
+    } catch(error:unknown){
+        console.log("Failed to delete file: ", error);
         return null;
     }
 }

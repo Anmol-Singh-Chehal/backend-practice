@@ -1,6 +1,6 @@
 import asyncHandler from "../utils/asyncHandler";
 import { NextFunction, Request, Response } from "express";
-import { uploadOnCloudinary } from "../utils/cloudinary";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
 import { User } from "../lib/models/User.model";
 import ApiError from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResonse";
@@ -139,7 +139,7 @@ const signOut = asyncHandler(async (req:Request, res:Response) => {
     );
 });
 
-const refreshTheAccessToken = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+const refreshTheAccessToken = asyncHandler(async (req:Request, res:Response) => {
 
     try {
         const oldRefreshToken:string = req.cookies.refreshToken || req.body.refreshToken;
@@ -179,7 +179,7 @@ const refreshTheAccessToken = asyncHandler(async (req:Request, res:Response, nex
 
 });
 
-const updateUserPassword = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+const updateUserPassword = asyncHandler(async (req:Request, res:Response) => {
     const { 
         oldPassword, 
         newPassword, 
@@ -204,7 +204,7 @@ const updateUserPassword = asyncHandler(async (req:Request, res:Response, next:N
     );
 }); 
 
-const getUserDetials = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+const getUserDetials = asyncHandler(async (req:Request, res:Response) => {
 
     return res.status(200)
     .json(
@@ -212,7 +212,7 @@ const getUserDetials = asyncHandler(async (req:Request, res:Response, next:NextF
     );
 });
 
-const updateUserDetails = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+const updateUserDetails = asyncHandler(async (req:Request, res:Response) => {
 
     const {
         fullName,
@@ -233,7 +233,7 @@ const updateUserDetails = asyncHandler(async (req:Request, res:Response, next:Ne
     );
 });
 
-const updateUserAvatar = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+const updateUserAvatar = asyncHandler(async (req:Request, res:Response) => {
 
     const avatarLocalPath  = req.file?.path as string;
     if(!avatarLocalPath) throw new ApiError(400, "Avatar image is missing.");
@@ -244,9 +244,12 @@ const updateUserAvatar = asyncHandler(async (req:Request, res:Response, next:Nex
     const user = await User.findByIdAndUpdate(
         req.user._id,
         { $set: { avatar: avatar.url } },
-        { new: true },
+        { new: false },
     ).select( "-password -refreshToken" );
     if(!user) throw new ApiError(400, "Invalid access, failed to found user.");
+
+    const isDeletedFromCloudinary = await deleteFromCloudinary(user.avatar);
+    if(!isDeletedFromCloudinary) throw new ApiError(500, "Failed to delete old avatar image.");
 
     return res.status(200)
     .json(
@@ -254,7 +257,7 @@ const updateUserAvatar = asyncHandler(async (req:Request, res:Response, next:Nex
     );
 });
 
-const updateUserCoverImage = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+const updateUserCoverImage = asyncHandler(async (req:Request, res:Response) => {
     
     const coverImageLocalPath  = req.file?.path as string;
     if(!coverImageLocalPath) throw new ApiError(400, "Cover image is missing.");
@@ -265,9 +268,12 @@ const updateUserCoverImage = asyncHandler(async (req:Request, res:Response, next
     const user = await User.findByIdAndUpdate(
         req.user._id,
         { $set: { avatar: coverImage.url } },
-        { new: true },
+        { new: false },
     ).select( "-password -refreshToken" );
     if(!user) throw new ApiError(400, "Invalid access, failed to found user.");
+
+    const isDeletedFromCloudinary = await deleteFromCloudinary(user.coverImage);
+    if(!isDeletedFromCloudinary) throw new ApiError(500, "Failed to delete old cover image.");
 
     return res.status(200)
     .json(
