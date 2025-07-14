@@ -29,4 +29,21 @@ interface updateUserDetailsTypes{
     email: string,
 }
 
-export { userTypes, userMethods, updatePasswordTypes, updateUserDetailsTypes };
+interface channelUserProfileTypes{
+    fullName: string,
+    username: string,
+    subscriberCount: number,
+    subscribedCount: number,
+    isSubscribed: boolean,
+    avatar: string,
+    coverImage: string,
+    email: string,
+}
+
+export { 
+    userTypes, 
+    userMethods, 
+    updatePasswordTypes, 
+    updateUserDetailsTypes,
+    channelUserProfileTypes
+};

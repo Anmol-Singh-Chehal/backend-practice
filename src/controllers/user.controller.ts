@@ -7,7 +7,7 @@ import { ApiResponse } from "../utils/ApiResonse";
 import { accessTokenPayloadType, signInDetails, signUpDetials, tokens } from "../types/common.type";
 import { ObjectId } from "mongoose";
 import jwt from "jsonwebtoken";
-import { updatePasswordTypes, updateUserDetailsTypes, userTypes } from "../types/user.type";
+import { channelUserProfileTypes, updatePasswordTypes, updateUserDetailsTypes, userTypes } from "../types/user.type";
 
 const generateAccessAndRefreshToken = async (userId:ObjectId):Promise<tokens> => {
     try {
@@ -281,6 +281,69 @@ const updateUserCoverImage = asyncHandler(async (req:Request, res:Response) => {
     );
 });
 
+const getUserChannelProfile = asyncHandler(async (req:Request, res:Response) => {
+
+    const { username } = req.params;
+    if(!username?.trim()) throw new ApiError(400, "username is missing.");
+
+    const channel = await User.aggregate([
+        {
+            $match: { "username": username.toLowerCase() },
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribed"
+            }
+        },
+        {
+            $addFields: {
+                $subscriberCount: {
+                    $size: "$subscribers"
+                },
+                $subscribedCount: {
+                    $size: "$subscribed"
+                },
+                $isSubscribed: {
+                    $cond: {
+                        if: { $in: [ req?.user?._id, "$subscribers.subscriber" ] },
+                        then: true,
+                        else: false,
+                    }
+                }
+            },
+        },
+        {
+            $project: {
+                fullName: true,
+                username: true,
+                subscriberCount: true,
+                subscribedCount: true,
+                isSubscribed: true,
+                avatar: true,
+                coverImage: true,
+                email: true,
+            }
+        }
+    ]) as channelUserProfileTypes[];
+
+    if(!channel) throw new ApiError(400, "Channel not found.");
+    return res.status(200)
+    .json(
+        new ApiResponse(200, channel[0], "Successfully fetched channel details.")
+    )
+});
+
 export { 
     signUp, 
     signIn, 
@@ -291,4 +354,5 @@ export {
     updateUserDetails,
     updateUserAvatar,
     updateUserCoverImage,
+    getUserChannelProfile
 };
