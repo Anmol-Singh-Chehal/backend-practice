@@ -16,7 +16,7 @@ export type tokens = {
 }
 
 export type accessTokenPayloadType = {
-    _id: ObjectId,
+    _id: string,
     username: string,
     fullName: string,
     email: string,
